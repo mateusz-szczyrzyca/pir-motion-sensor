@@ -1,0 +1,18 @@
+[package]
+name = "pir-motion-sensor"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mateusz Szczyrzyca <mateusz@szczyrzyca.pl>"]
+readme = "README.md"
+repository = "https://github.com/mateusz-szczyrzyca/pir-motion-sensor/"
+description = "Rust Library for PIR motion sensors"
+keywords = ["raspberry", "smart home", "motion sensor", "iot"]
+categories = ["embedded", "cryptography::cryptocurrencies"]
+
+[dependencies]
+chrono = "0.4.23"
+env_logger = "0.9.0"
+log = "0.4.17"
+rppal = "0.13.1"
+serde = { version = "1.0.144", features = ["derive"] }
+tokio = { version = "1.23.0", features = ["full"]}
