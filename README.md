@@ -85,7 +85,15 @@ Please see examples in `examples/` directory
 &nbsp;
 ## Contributions
 
-Contributions highly welcomed.
+Contributions highly welcomed. 
+
+There are unit tests for this library which can be run by 
+
+`cargo test -- --nocapture`
+
+If you contribute don't forget to add test cases for your changes.
 
 &nbsp;
 ## TODO
+
+Soon.
