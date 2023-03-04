@@ -120,7 +120,6 @@ impl MotionSensor {
             //
         }
 
-        let detection_moment: Option<Instant> = None;
         let mut sensor_trigger_count: i16 = 0;
 
         // let mut time_temp = Instant::now();
