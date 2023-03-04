@@ -7,7 +7,7 @@ readme = "README.md"
 repository = "https://github.com/mateusz-szczyrzyca/pir-motion-sensor/"
 description = "Rust Library for PIR motion sensors"
 keywords = ["raspberry", "embedded", "library", "iot", "automation", "hardware"]
-categories = ["embedded", "cryptography::cryptocurrencies"]
+categories = ["embedded"]
 
 [dependencies]
 chrono = "0.4.23"
