@@ -6,7 +6,7 @@ authors = ["Mateusz Szczyrzyca <mateusz@szczyrzyca.pl>"]
 readme = "README.md"
 repository = "https://github.com/mateusz-szczyrzyca/pir-motion-sensor/"
 description = "Rust Library for PIR motion sensors"
-keywords = ["raspberry", "smart home", "motion sensor", "iot"]
+keywords = ["raspberry", "embedded", "library", "iot", "automation", "hardware"]
 categories = ["embedded", "cryptography::cryptocurrencies"]
 
 [dependencies]
