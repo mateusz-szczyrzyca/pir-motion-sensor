@@ -50,6 +50,8 @@ In this instruction, there is a term `valid detection` - this is a detection whi
 
 In other words: depends on sensor configuration, there can be many detections made by sensor (here defined as setting it's  OUT pin at high state), but it does not mean, there will be any `valid detection` classified.
 
+
+
 &nbsp;
 
 ## Configuration
@@ -77,6 +79,8 @@ Setting these parameters allow you to decide how sensitive and accurate is your 
 
 &nbsp;
 ## Using in your project
+
+Please see examples in `examples/` directory
 
 &nbsp;
 ## Contributions
