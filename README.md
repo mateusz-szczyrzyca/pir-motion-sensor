@@ -1,18 +1,6 @@
 ## pir-motion-sensor
 
-Rust library to interact mainly with PIR motion sensors. This lib was tested on HC-SR501 on Raspberry Pi 400 and Raspberry Pi 4B and it's widely used at my appartment and at my familys house - for smart alarm purposes (code will be published) and some in-house activies like turning on/off various devices based on motion detection.
-
-&nbsp;
-
-## Tested devices
-
-Raspberry Pis:
-- Raspberry Pi 4B 4 and 8 GB RAM - Raspbian GNU/Linux 11 (bullseye)
-- Raspbbery Pi 400 4 GB RAM - Raspbian GNU/Linux 11 (bullseye)
-
-Sensors:
-
-- HC-SR501 PIR
+Rust library to interact mainly with PIR motion sensors. This lib was tested on HC-SR501 on Raspberry Pi 400 and Raspberry Pi 4B and it's widely used at my appartment and at my family's house - for smart alarm purposes (rest code will be published) and some in-house activies like turning on/off various devices based on motion detection.
 
 &nbsp;
 
@@ -28,6 +16,18 @@ HC-SR501 PIR is not probably the only one infrared sensor which can be supported
 
 &nbsp;
 
+## Tested devices
+
+Raspberry Pis:
+- Raspberry Pi 4B 4 and 8 GB RAM - Raspbian GNU/Linux 11 (bullseye)
+- Raspbbery Pi 400 4 GB RAM - Raspbian GNU/Linux 11 (bullseye)
+
+Sensors:
+
+- HC-SR501 PIR
+
+&nbsp;
+
 ## Prerequsities
 
 Use this reference manual for HC-SR501 PIR: https://lastminuteengineers.com/pir-sensor-arduino-tutorial/
@@ -36,19 +36,25 @@ Based on this manual, you should:
 
 - set Sensitivity Adjustment yellow screw to longest range possible
 - set Time-Delay Adjustment yellow screw to shortest time possible
-- set Trigger Selection Jumper to Multiple Trigger Mode
+- set Trigger Selection Jumper to Multiple Trigger Mode, by default it' probably set to Single Trigger
 
-Allow of above settings can be programmatically changed by this library, so you won't need to touch jumper and screws again anymore after this operation.
+All of above settings can be programmatically changed by this library, so you won't need to touch jumper and screws again after this operation.
 
-If you are not sure if you did it correctly - attach your sensor to VCC (5V), GND of your raspberry, and simple LED diode with **resistor** (betwen 1-10 kΩ) to OUT signal from the sensor and based on LED check how this sensor work after these adjustments. Be aware, that sensors sets ~5V on it's OUT PIN, when it detects motion, which is at high state.
+If you are not sure if you did it correctly - attach your sensor to VCC (5V), GND of your raspberry, and simple LED diode with **resistor** (betwen 1-10 kΩ) to OUT signal from the sensor and based on LED check how this sensor work after these adjustments. Be aware, that sensors sets ~5V on it's OUT PIN, when it detects motion, which is it's high state.
+
+&nbsp;
+
+## Different model of motion sensor
+
+If you have a different model of PIR motion sensor (or microwave sensor) which is purely digital (only sets it's pin signal to high state when it detects motion, then this library should also be suitable for it.
 
 &nbsp;
 
 ## How it works
 
-In this instruction, there is a term `valid detection` - this is a detection which is classified as *valid by this library - which may be not the same as OUT pin state of the sensor* - everything depends on your configuration.
+In this instruction, there is a term `valid detection` - this is a detection which is classified as *valid* by this library - which may be not the same as OUT pin state of the sensor - everything depends on your configuration.
 
-In other words: depends on sensor configuration, there can be many detections made by sensor (here defined as setting it's  OUT pin at high state), but it does not mean, there will be any `valid detection` classified.
+In other words: depends on sensor configuration, there can be many detections made by sensor (here defined as setting it's OUT pin at high state), but it does not mean, there will be single `valid detection` classified.
 
 
 
@@ -58,7 +64,7 @@ In other words: depends on sensor configuration, there can be many detections ma
 
 To init your sensor, consider the following parameters:
 
-- GPIO PIN number (obvious staff), not required for tests, see `tests/valid_detections.rs`
+- GPIO PIN number (obvious staff), not required for tests, see `tests/valid_detections.rs` for more information.
 
 - **sensor refresh rate**
   This isn't refresh rate for a sensor itself, but refresh rate for loop reading sensor PIN state. Shorter time allows
@@ -75,7 +81,7 @@ To init your sensor, consider the following parameters:
 
 To short sum up these parameters: based on `sensor refresh rate` time it periodically reads state of sensor OUT pin. If there is a detection (or high state), the library will try to count up these states to `minimal triggering number` within `motion time period`. If `minimal triggering number` within `motion time period` is reached, then it means valid detection (from library standpoint) just happened.
 
-Setting these parameters allow you to decide how sensitive and accurate is your sensor. 
+Setting these parameters allows you to decide how sensitive and accurate is your sensor. Because "noise" detections are usually very short hence using this library you can effectively get rid of them if your settings are not too sensitive (sensor_refresh_rate > 100, motion_time_period < 2000, minimal_triggering_number > 1)
 
 &nbsp;
 ## Using in your project
@@ -85,7 +91,7 @@ Please see examples in `examples/` directory
 &nbsp;
 ## Contributions
 
-Contributions highly welcomed. 
+Contributions are highly welcomed. 
 
 There are unit tests for this library which can be run by 
 
