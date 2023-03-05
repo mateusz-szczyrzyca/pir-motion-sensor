@@ -46,7 +46,7 @@ If you are not sure if you did it correctly - attach your sensor to VCC (5V), GN
 
 ## Different model of motion sensor
 
-If you have a different model of PIR motion sensor (or microwave sensor) which is purely digital (only sets it's pin signal to high state when it detects motion, then this library should also be suitable for it.
+If you have a different model of PIR motion sensor (or microwave sensor) which is purely digital (only sets it's pin signal to high state when it detects motion), then this library should also be suitable for it.
 
 &nbsp;
 
