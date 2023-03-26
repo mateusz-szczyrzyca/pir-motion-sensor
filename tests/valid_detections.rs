@@ -1,5 +1,4 @@
 use pir_motion_sensor::sensor::motion::MotionSensor;
-use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 
 struct TestCase {
     sensor: MotionSensor,
@@ -10,19 +9,23 @@ struct TestCase {
 #[cfg(test)]
 mod tests {
     use std::{
-        sync::mpsc,
-        time::{Instant, SystemTime},
+        sync::Arc,
+        time::{Duration, Instant, SystemTime},
     };
+
+    use pir_motion_sensor::sensor::helpers::{process_detections_data, reading_data_from_sensors};
+    use tokio::sync::mpsc::{self, Receiver, Sender};
+    use tokio::sync::Mutex;
 
     use super::*;
 
     #[tokio::test]
     async fn valid_detections() {
         #[allow(clippy::type_complexity)]
-        let (detections_channel_in, detections_channel_out): (
-            SyncSender<(String, SystemTime)>,
+        let (detections_channel_in, mut detections_channel_out): (
+            Sender<(String, SystemTime)>,
             Receiver<(String, SystemTime)>,
-        ) = sync_channel(0);
+        ) = mpsc::channel(100);
 
         let test_cases_list: Vec<TestCase> = vec![
             TestCase {
@@ -117,47 +120,46 @@ mod tests {
             },
         ];
 
+        // #[allow(clippy::type_complexity)]
+        // let (detections_channel_sender, mut detections_channel_receiver): (
+        //     Sender<(String, SystemTime)>,
+        //     Receiver<(String, SystemTime)>,
+        // ) = mpsc::channel(100);
+
         //
         //
         //
         for test_case in test_cases_list.into_iter() {
-            let mut s = test_case.sensor;
+            //
+            let mut sensors = Vec::new();
+            sensors.push(Arc::new(Mutex::new(test_case.sensor)));
 
-            println!(
-                "testing {}, timeout (milisecs): {}",
-                s.config.name, test_case.test_timeout_milisecs
-            );
-            let (stop_detection_cmd, receiver) = mpsc::channel();
+            // bulding list of sensors to use it later
+            let sensors_list_copy = sensors.clone();
 
-            // starting detector in the background
-            tokio::task::spawn_blocking(move || s.start_detector(receiver));
+            tokio::spawn(async move { process_detections_data(sensors_list_copy).await });
 
-            let mut time_start = None;
+            tokio::spawn(async move {
+                reading_data_from_sensors(sensors).await;
+            });
 
             let mut detections_count = 0;
+            let test_time_start = Instant::now();
+
             loop {
-                // timer start for the first time
-                if time_start.is_none() {
-                    time_start = Some(Instant::now());
+                if let Ok(_detection_message) = detections_channel_out.try_recv() {
+                    detections_count += 1;
                 }
 
-                // test timeout
-                if time_start.unwrap().elapsed().as_millis() >= test_case.test_timeout_milisecs {
-                    println!("test timeout.");
+                if test_time_start.elapsed().as_millis() > test_case.test_timeout_milisecs {
                     break;
                 }
 
-                // receiving (or not) testing detections
-                if detections_channel_out.try_recv().is_ok() {
-                    detections_count += 1;
-                }
+                tokio::time::sleep(Duration::from_millis(1)).await;
             }
-
-            // stopping this sensor
-            stop_detection_cmd.send(true).unwrap();
 
             assert_eq!(detections_count, test_case.expected_detections_count);
         }
-        println!("finished tests?");
+        println!("finished tests");
     }
 }
