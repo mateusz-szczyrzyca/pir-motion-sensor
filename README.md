@@ -1,6 +1,6 @@
 ## pir-motion-sensor
 
-Rust library to interact mainly with PIR motion sensors on Raspberry Pi platform. This lib was tested on HC-SR501 motion sensor on Raspberry Pi 400 and Raspberry Pi 4B and it's widely used at my appartment and at my family's house - for smart alarm purposes (rest code will be published) and some in-house activies like turning on/off various devices based on motion detection.
+Rust library to interact mainly with PIR motion sensors on Raspberry Pi platform. This lib was tested mainly on HC-SR501 motion sensor on Raspberry Pi 400 and Raspberry Pi 4B and it's widely used at my appartment and at my family's house - for smart alarm purposes (rest code will be published) and some in-house activies like turning on/off various devices based on motion detection.
 
 &nbsp;
 
@@ -12,19 +12,21 @@ However, because it's very cheap, it can detects "noise" from time to time, whic
 
 To eliminate this problem I created this simple library which allows to initialize this sensor with various parameters that they changes it's detection characteristic. The library, based on sensor configuration, can "ignore" these false detections and help make this sensors very reliable.
 
-HC-SR501 PIR is not probably the only one infrared sensor which can be supported by the library - if you tested with another motion sensor (or even with microwave) please let me know.
+HC-SR501 PIR is not probably the only one infrared sensor which can be supported by the library - if you tested with another motion sensor please let me know. Digital microwave sensor like DFRobot SEN0192 is also supported (keep in mind it may set High->Low state once detection happens)
 
 &nbsp;
 
 ## Tested devices
 
 Raspberry Pis:
+
 - Raspberry Pi 4B 4 and 8 GB RAM - Raspbian GNU/Linux 11 (bullseye)
 - Raspbbery Pi 400 4 GB RAM - Raspbian GNU/Linux 11 (bullseye)
 
-Sensors:
+Tested motion sensors:
 
-- HC-SR501 PIR
+- HC-SR501 PIR (infrared)
+- DFRobot SEN0192 (microwave)
 
 &nbsp;
 
