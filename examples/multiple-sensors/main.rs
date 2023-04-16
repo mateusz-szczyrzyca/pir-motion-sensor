@@ -1,9 +1,10 @@
-mod sensor;
-use pir_motion_sensor::sensor::helpers::{process_detections_data, reading_data_from_sensors};
+// mod sensor;
+use pir_motion_sensor::sensor::helpers::spawn_detection_threads;
 use pir_motion_sensor::sensor::motion::MotionSensor;
 use std::time::Duration;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tokio::sync::{mpsc, Mutex};
+use tokio_util::sync::CancellationToken;
 
 use std::{sync::Arc, time::SystemTime};
 
@@ -14,7 +15,7 @@ async fn main() {
     let (detections_channel_sender, mut detections_channel_receiver): (
         Sender<(String, SystemTime)>,
         Receiver<(String, SystemTime)>,
-    ) = mpsc::channel(100);
+    ) = mpsc::channel(10);
 
     //
     // sensors initialization - check README for more details about sensor parameters
@@ -29,7 +30,7 @@ async fn main() {
             500,                               // sensor motion time period in miliseconds
             5,                                 // sensor minimal triggering number
             detections_channel_sender.clone(), // channel where sensor thread will be sending detections
-            None, // None for real GPIO usage, Some(Vec<u128>) for unit tests, please check tests/* */
+            None, // None for real GPIO usage, Some(Vec<u64>) for unit tests, please check tests/* */
         ),
         // Main door
         MotionSensor::new(
@@ -71,21 +72,13 @@ async fn main() {
         let s = Arc::new(Mutex::new(sensor));
         sensors.push(s);
     });
-    let sensors_list_copy = sensors.clone();
-    //
-    // task: processing detections data in async function
-    //       You don't have to bother this if you don't want - just leave it as it is
-    //
 
-    tokio::spawn(async move { process_detections_data(sensors_list_copy).await });
+    // cancellation token which can be later used to stop sensors threads
+    let token = CancellationToken::new();
 
-    //
-    // task: reading data from sensor using async function reading_from_sensor()
-    //       You don't have to bother this if you don't want - just leave it as it is
-    //
-    tokio::spawn(async move {
-        reading_data_from_sensors(sensors).await;
-    });
+    // helper function to run important threads (via tokio::spawn)
+    // you don't have deal this is you don't want to - just leave it as it is
+    spawn_detection_threads(sensors, token.clone());
 
     //
     // main loop: here we put logic to handle valid detections, place your code here

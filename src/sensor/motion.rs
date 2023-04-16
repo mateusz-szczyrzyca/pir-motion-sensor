@@ -4,6 +4,8 @@ use rppal::gpio::{Gpio, IoPin};
 use std::time::{Instant, SystemTime};
 use tokio::sync::mpsc::{self, Receiver, Sender};
 
+const DETECTION_MARGIN_MILISECS: u64 = 10;
+
 use super::config::SensorConfig;
 
 #[derive(Debug)]
@@ -22,7 +24,7 @@ pub struct MotionSensor {
 #[derive(Debug)]
 pub struct SensorAdditionalSettings {
     pub stop: bool,
-    pub sensor_test_data: Option<Vec<u128>>,
+    pub sensor_test_data: Option<Vec<u64>>,
     pub sensor_test_time: Option<Instant>,
     pub sensor_test_index: usize,
     pub pin: Option<IoPin>,
@@ -34,11 +36,11 @@ impl MotionSensor {
     pub fn new(
         sensor_name: String,
         sensor_pin_number: u8,
-        sensor_refresh_rate_milisecs: u128,
+        sensor_refresh_rate_milisecs: u64,
         sensor_motion_time_period_milisecs: u64,
         sensor_minimal_triggering_number: i16,
         sensor_transmission_channel: Sender<(String, SystemTime)>,
-        sensor_test_data: Option<Vec<u128>>,
+        sensor_test_data: Option<Vec<u64>>,
     ) -> Self {
         let config = SensorConfig {
             name: sensor_name,
@@ -68,11 +70,11 @@ impl MotionSensor {
             pin_init = Some(pin);
         }
 
-        let (detections_stream, detections_receiver) = mpsc::channel(1);
+        let (detections_stream, detections_receiver) = mpsc::channel(10);
 
-        if pin_init.is_some() {
-            detection_stream_channel_init = Some(detections_stream);
-        }
+        // if pin_init.is_some() {
+        detection_stream_channel_init = Some(detections_stream);
+        // }
 
         //
         // initialization
@@ -157,12 +159,19 @@ impl MotionSensor {
                     .sensor_test_time
                     .unwrap()
                     .elapsed()
-                    .as_millis();
+                    .as_millis() as u64;
 
                 // taking detection time from the list
                 let testing_detection_time_milisecs = detections_time_list[current_index];
 
-                if milisecs_now == testing_detection_time_milisecs {
+                // this +10 milisec is added as a precaution - sometimes we want to have detection at 500 milisec,
+                // but it happens at 501 or 502 milisecond which is "too late". Normal condition here (==) would fail so
+                // we check broader condition ">=" but using only this this would be not sufficient here (each subsequent detection
+                // will happen in >= time - obvious). So additionaly we check a small margin of +10 additional miliseconds which
+                // is here as DETECTION_MARGIN_MILISECS constant
+                if milisecs_now >= testing_detection_time_milisecs
+                    && milisecs_now + DETECTION_MARGIN_MILISECS > testing_detection_time_milisecs
+                {
                     // updating index - next time we will take next detection from the list
                     self.additional_settings.sensor_test_index += 1;
 
@@ -171,7 +180,7 @@ impl MotionSensor {
                         detection_stream_channel
                             .expect("cannot use channel for detection stream")
                             .try_send(true)
-                            .unwrap_or_default()
+                            .unwrap()
                     }
                 }
             }
@@ -183,7 +192,7 @@ impl MotionSensor {
     }
 
     //
-    // processing detections, they may be real from GPIO or from testing code. These detections are received from channel
+    // processing detections, they may be real from GPIO or from testing code.
     //
     pub async fn process_detections(
         &mut self,
@@ -192,23 +201,35 @@ impl MotionSensor {
     ) -> (i16, Instant) {
         let mut sensor_trigger_count = last_sensor_trigger_count;
 
-        if last_check_time.elapsed().as_millis() <= self.config.refresh_rate_milisecs {
-            // sensor refresh rate - too early to check
+        if last_check_time.elapsed().as_millis() as u64 <= self.config.refresh_rate_milisecs {
+            // "sensor refresh rate" - if it's too early to check, then we return instantly
+            // but we don't modify "last_check_time" - in another function await this time still
+            // will be used to determine if it's time to check internal channel for detections
             return (last_sensor_trigger_count, last_check_time);
         }
 
+        // sensor refresh rate is larger or equal the actual timer - now we can read state of the
+        // channel and proceed with the logic. In that sense, short "refresh_rate_milisec" values
+        // just means we read detection channel more often and we can count more detections.
+
         let last_check_moment = last_check_time;
 
+        //
         // reading detections from channel - these detections may come from real gpio
         // pin or from tests without gpio involved
+        //
+        // try_recv() because this is an async func - we don't care if there is no detection data
+        // in the channel and moving forward asap. If there are detections in the channel then we
+        // will proceed them normally, but the highest priority of this function is to don't block it.
+        //
         if self
             .additional_settings
             .detections_receiver
             .try_recv()
             .is_ok()
         {
-            // println!("detection... {}", self.config.name);
-            // this data per sensor?
+            // pre-detection is received from internal channel: that can be real detection from GPIO or test detection
+            // from unit tests
             let time_difference = last_check_moment.elapsed().as_millis();
 
             if time_difference > self.config.motion_time_period_milisecs.into() {
@@ -216,22 +237,27 @@ impl MotionSensor {
                 sensor_trigger_count = 0;
             }
 
+            // this func is async so we increment counter (or not)
             sensor_trigger_count += 1;
 
             if sensor_trigger_count >= self.config.minimal_triggering_number {
-                // minimal_triggering_number is reached - this is valid detection
+                //
+                // minimal_triggering_number is reached - this is valid detection so send it to the main channel
+                //
                 let t = SystemTime::now();
                 self.last_detection_time = Some(t);
 
+                // sending real (VALID) detection to the main channel as we reached suitable "minimal_triggering_number"
                 self.detection_channel
                     .try_send((self.config.name.clone(), t))
                     .unwrap_or_default();
 
-                // reset counter - next detection will be counted as different one
+                // reset counter - next detection will be counted as different one from zero again
                 sensor_trigger_count = 0;
             }
         }
 
+        // return current counter and time which later will be used to determine another detections (valid or pre-detections)
         (sensor_trigger_count, Instant::now())
     }
 }
