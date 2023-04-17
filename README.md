@@ -12,7 +12,9 @@ However, because it's very cheap, it can detects "noise" from time to time, whic
 
 To eliminate this problem I created this simple library which allows to initialize this sensor with various parameters that they changes it's detection characteristic. The library, based on sensor configuration, can "ignore" these false detections and help make this sensors very reliable.
 
-HC-SR501 PIR is not probably the only one infrared sensor which can be supported by the library - if you tested with another motion sensor please let me know. Digital microwave sensor like DFRobot SEN0192 is also supported (keep in mind it may set High->Low state once detection happens)
+HC-SR501 PIR is not probably the only one infrared sensor which can be supported by the library - if you tested with another motion sensor please let me know. 
+
+Digital microwave sensor like DFRobot SEN0192 is also supported, but keep in mind that SEN0192 sets from `High` to `Low` state once detection happens, so you have to [simply invert this signal by a proper transistor in your circuit to take advantage of this library](https://en.wikipedia.org/wiki/Inverter_(logic_gate)).
 
 &nbsp;
 
