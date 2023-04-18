@@ -14,7 +14,7 @@ To eliminate this problem I created this simple library which allows to initiali
 
 HC-SR501 PIR is not probably the only one infrared sensor which can be supported by the library - if you tested with another motion sensor please let me know. 
 
-Digital microwave sensor like DFRobot SEN0192 is also supported, but keep in mind that SEN0192 sets from `High` to `Low` state once detection happens, so you have to [simply invert this signal by a proper transistor in your circuit to take advantage of this library](https://en.wikipedia.org/wiki/Inverter_(logic_gate)).
+Digital microwave sensor like DFRobot SEN0192 is also supported, but keep in mind that SEN0192 sets from `High` to `Low` state once detection happens, so you have to [simply invert this signal by a proper transistor in your circuit to take advantage of this library](https://en.wikipedia.org/wiki/Inverter_(logic_gate)). Currently I have no plan to implement alternative logic for such sensors.
 
 &nbsp;
 
@@ -28,6 +28,7 @@ Raspberry Pis:
 Tested motion sensors:
 
 - HC-SR501 PIR (infrared)
+- HC-SR505 (infrared - basic support as you can't change factory values of this simple sensor)
 - DFRobot SEN0192 (microwave)
 
 &nbsp;
@@ -60,8 +61,6 @@ In this instruction, there is a term `valid detection` - this is a detection whi
 
 In other words: depends on sensor configuration, there can be many detections made by sensor (here defined as setting it's OUT pin at high state), but it does not mean, there will be single `valid detection` classified.
 
-
-
 &nbsp;
 
 ## Configuration
@@ -88,7 +87,7 @@ To conclude these parameters shortly: based on `sensor refresh rate` time, the l
 Setting these parameters allows you to decide how sensitive and accurate is your sensor. Because "noise" detections are usually very short hence using this library you can effectively get rid of them if your settings are not too sensitive (good tested values: `sensor_refresh_rate > 100`, `motion_time_period < 1000`, `minimal_triggering_number > 2`). Feel free to experiment with your own
 values.
 
-Keep in mind that these settings affect each other, for instance: a very short `sensor_refresh_rate` can be reduced by higher values of `motion_time_period` and `minimal_triggering_number`
+Keep in mind that these settings can affect each other, for instance: a very short `sensor_refresh_rate` can be reduced by higher values of `motion_time_period` and `minimal_triggering_number`
 
 &nbsp;
 ## Using in your project
