@@ -17,3 +17,4 @@ log = "0.4.17"
 rppal = "0.13.1"
 serde = { version = "1.0.144", features = ["derive"] }
 tokio = { version = "1.23.0", features = ["full"]}
+tokio-util = "0.7.7"
