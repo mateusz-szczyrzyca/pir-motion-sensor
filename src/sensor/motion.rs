@@ -119,7 +119,6 @@ impl MotionSensor {
             //
             if pin.is_high() {
                 // revert the state to be sure
-                pin.toggle();
 
                 // try to send as many as possible but if the channel is full, we just ignore it
                 // that's why try_send() is used here
