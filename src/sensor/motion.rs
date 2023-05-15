@@ -118,8 +118,6 @@ impl MotionSensor {
             );
             //
             if pin.is_high() {
-                // revert the state to be sure
-
                 // try to send as many as possible but if the channel is full, we just ignore it
                 // that's why try_send() is used here
                 // unwrap_or_default() - because we don't care if each single detection is successfully
