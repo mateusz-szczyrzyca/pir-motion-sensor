@@ -52,7 +52,7 @@ impl MotionSensor {
 
         // default values
         let mut pin_init = None;
-        let mut detection_stream_channel_init = None;
+        let detection_stream_channel_init;
 
         if sensor_test_data.is_none() {
             let gpio = Gpio::new().unwrap();
@@ -209,8 +209,6 @@ impl MotionSensor {
         // channel and proceed with the logic. In that sense, short "refresh_rate_milisec" values
         // just means we read detection channel more often and we can count more detections.
 
-        let last_check_moment = last_check_time;
-
         //
         // reading detections from channel - these detections may come from real gpio
         // pin or from tests without gpio involved
@@ -225,17 +223,17 @@ impl MotionSensor {
             .try_recv()
             .is_ok()
         {
-            // pre-detection is received from internal channel: that can be real detection from GPIO or test detection
-            // from unit tests
-            let time_difference = last_check_moment.elapsed().as_millis();
-
-            if time_difference > self.config.motion_time_period_milisecs.into() {
-                // this is a new detection - reset time and counter
-                sensor_trigger_count = 0;
-            }
-
             // this func is async so we increment counter (or not)
             sensor_trigger_count += 1;
+
+            // because we use Instant::now, the real time difference needs to be multiply by counts to
+            // reflect real motion time period time
+            let time_difference = self.config.refresh_rate_milisecs * sensor_trigger_count as u64;
+
+            if time_difference > self.config.motion_time_period_milisecs {
+                // this is a new detection - reset counter
+                sensor_trigger_count = 1;
+            }
 
             if sensor_trigger_count >= self.config.minimal_triggering_number {
                 //

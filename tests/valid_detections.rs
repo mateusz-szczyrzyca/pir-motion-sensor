@@ -39,11 +39,11 @@ mod tests {
                 //            expected detections count.
                 //
                 sensor: MotionSensor::new(
-                    String::from("SensorSimpleDetection"), // name of the sensor
-                    0,                                     // pin number - not relevant in tests
-                    500,                                   // sensor refresh rate in miliseconds
-                    1000,                                  // motion time period in miliseconds
-                    2, // required number of detection to classify
+                    String::from("Simple detection 1"), // name of the sensor
+                    0,                                  // pin number - not relevant in tests
+                    500,                                // sensor refresh rate in miliseconds
+                    1000,                               // motion time period in miliseconds
+                    2,                                  // required number of detection to classify
                     detections_channel_in.clone(),
                     Some(vec![490, 990]), // at which milisec test detection happen, here at 490 ms and 500 ms
                                           //
@@ -64,11 +64,11 @@ mod tests {
                 //
                 //
                 sensor: MotionSensor::new(
-                    String::from("SensorValidDetections2"), // name of the sensor
-                    0,                                      // pin number - not relevant in tests
-                    100,                                    // sensor refresh rate in miliseconds
-                    500,                                    // motion time period in miliseconds
-                    5, // required number of detection to classify
+                    String::from("Simple detection 2"), // name of the sensor
+                    0,                                  // pin number - not relevant in tests
+                    100,                                // sensor refresh rate in miliseconds
+                    500,                                // motion time period in miliseconds
+                    5,                                  // required number of detection to classify
                     detections_channel_in.clone(),
                     Some(vec![90, 190, 290, 390, 490, 501]), // at which milisec test detection happen
                 ),
@@ -83,11 +83,11 @@ mod tests {
                 //
                 //
                 sensor: MotionSensor::new(
-                    String::from("SensorValidDetections3"), // name of the sensor
-                    0,                                      // pin number - not relevant in tests
-                    100,                                    // sensor refresh rate in miliseconds
-                    500,                                    // motion time period in miliseconds
-                    5, // required number of detection to classify
+                    String::from("Two valid detections from 10"), // name of the sensor
+                    0,   // pin number - not relevant in tests
+                    100, // sensor refresh rate in miliseconds
+                    500, // motion time period in miliseconds
+                    5,   // required number of detection to classify
                     detections_channel_in.clone(),
                     Some(vec![90, 190, 290, 390, 490, 550, 650, 750, 950, 1010]), // at which milisec test detection happen
                 ),
@@ -102,11 +102,11 @@ mod tests {
                 //
                 //
                 sensor: MotionSensor::new(
-                    String::from("SensorValidDetections3_ManyDetections"), // name of the sensor
-                    0,   // pin number - not relevant in tests
-                    100, // sensor refresh rate in miliseconds
-                    200, // motion time period in miliseconds
-                    1,   // required number of detection to classify
+                    String::from("10/10 fast detections"), // name of the sensor
+                    0,                                     // pin number - not relevant in tests
+                    100,                                   // sensor refresh rate in miliseconds
+                    200,                                   // motion time period in miliseconds
+                    1, // required number of detection to classify
                     detections_channel_in.clone(),
                     Some(vec![90, 190, 290, 390, 490, 590, 690, 790, 890, 990]), // at which milisec test detections happen
                 ),
@@ -119,11 +119,11 @@ mod tests {
                 //            one VALID detection instead of 10 as previous.
                 //
                 sensor: MotionSensor::new(
-                    String::from("SensorValidDetections4_OneBigDetection"), // name of sensor
-                    0,    // pin number - not relevant in tests
-                    100,  // sensor refresh rate in miliseconds
-                    1000, // motion time period in miliseconds
-                    10,   // required number of detection to classify
+                    String::from("Single detection from 10"), // name of sensor
+                    0,                                        // pin number - not relevant in tests
+                    100,                                      // sensor refresh rate in miliseconds
+                    1000,                                     // motion time period in miliseconds
+                    10, // required number of detection to classify
                     detections_channel_in,
                     Some(vec![90, 190, 290, 390, 490, 590, 690, 790, 890, 990]), // at which milisec test detections happen
                 ),
