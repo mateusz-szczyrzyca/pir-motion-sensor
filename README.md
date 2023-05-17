@@ -4,6 +4,10 @@ Rust library to interact mainly with PIR motion sensors on Raspberry Pi platform
 
 &nbsp;
 
+The library leverages the tokio runtime and supports many sensors at the same time (I tested 20 at the same time) with low resource usage which is important, especially for older version of Raspberry Pi or Pi Zero versions.
+
+&nbsp;
+
 ## Why this library?
 
 HC-SR501 PIR is very cheap and widely available an infrared motion sensor and it's very capable to various project based on arduino/raspberry/stm32, etc. 
