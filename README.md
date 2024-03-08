@@ -27,7 +27,8 @@ Digital microwave sensor like DFRobot SEN0192 is also supported, but keep in min
 Raspberry Pis:
 
 - Raspberry Pi 4B 4 and 8 GB RAM - Raspbian GNU/Linux 11 (bullseye)
-- Raspbbery Pi 400 4 GB RAM - Raspbian GNU/Linux 11 (bullseye)
+- Raspberry Pi 400 4 GB RAM - Raspbian GNU/Linux 11 (bullseye)
+- Raspberry Pi 5 8 GB RAM - Raspbian GNU/Linux 12 (bookworm) 64bit
 
 Tested motion sensors:
 
