@@ -173,11 +173,10 @@ impl MotionSensor {
                     self.additional_settings.sensor_test_index += 1;
 
                     // sending testing detection to the channel which looks like "real"
-                    if detection_stream_channel.is_some() {
-                        detection_stream_channel
-                            .expect("cannot use channel for detection stream")
+                    if let Some(detection_channel) = detection_stream_channel {
+                        detection_channel
                             .try_send(true)
-                            .unwrap()
+                            .expect("cannot use channel for detection stream");
                     }
                 }
             }
