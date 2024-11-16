@@ -137,11 +137,12 @@ mod tests {
         //
         for test_case in test_cases_list.into_iter() {
             //
-            let mut sensors = Vec::new();
+            let mut sensors_vec = Vec::new();
             let name = test_case.sensor.config.name.clone();
-            sensors.push(Arc::new(Mutex::new(test_case.sensor)));
+            sensors_vec.push(Mutex::new(test_case.sensor));
+            let sensors = Arc::new(sensors_vec);
 
-            let token = CancellationToken::new();
+            let token = Arc::new(CancellationToken::new());
 
             spawn_detection_threads(sensors, token.clone());
 

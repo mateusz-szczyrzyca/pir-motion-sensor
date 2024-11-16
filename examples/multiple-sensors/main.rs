@@ -4,6 +4,7 @@ use pir_motion_sensor::sensor::motion::MotionSensor;
 use std::time::Duration;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tokio::sync::{mpsc, Mutex};
+use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 
 use std::{sync::Arc, time::SystemTime};
@@ -24,7 +25,7 @@ async fn main() {
     let sensors_list = vec![
         // Bedroom
         MotionSensor::new(
-            String::from("SensorBedroom5na5"), // name
+            String::from("SensorBedroom"),     // name
             6,                                 // gpio PIN number
             100,                               // sensor refresh rate in miliseconds
             500,                               // sensor motion time period in miliseconds
@@ -69,12 +70,13 @@ async fn main() {
 
     // bulding list of sensors to use it later
     sensors_list.into_iter().for_each(|sensor| {
-        let s = Arc::new(Mutex::new(sensor));
-        sensors.push(s);
+        sensors.push(Mutex::new(sensor));
     });
 
+    let sensors = Arc::new(sensors); 
+
     // cancellation token which can be later used to stop sensors threads
-    let token = CancellationToken::new();
+    let token = Arc::new(CancellationToken::new());
 
     // helper function to run important threads (via tokio::spawn)
     // you don't have deal this is you don't want to - just leave it as it is
@@ -95,6 +97,6 @@ async fn main() {
             // to interact with rest GPIOs you can check rppal lib examples here: https://github.com/golemparts/rppal/tree/master/examples
             //
         }
-        tokio::time::sleep(Duration::from_millis(1)).await;
+        sleep(Duration::from_millis(1)).await;
     }
 }

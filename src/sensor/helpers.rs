@@ -6,8 +6,8 @@ use crate::sensor::motion::MotionSensor;
 use std::sync::Arc;
 
 pub async fn process_detections_data(
-    sensor: Vec<Arc<Mutex<MotionSensor>>>,
-    process: CancellationToken,
+    sensor: Arc<Vec<Mutex<MotionSensor>>>,
+    process: Arc<CancellationToken>,
 ) {
     let mut detection_data: Vec<(i16, Instant)> = vec![(0, Instant::now()); sensor.len()];
     loop {
@@ -31,8 +31,8 @@ pub async fn process_detections_data(
 }
 
 pub async fn reading_data_from_sensors(
-    sensors: Vec<Arc<Mutex<MotionSensor>>>,
-    reading: CancellationToken,
+    sensors: Arc<Vec<Mutex<MotionSensor>>>,
+    reading: Arc<CancellationToken>,
 ) {
     loop {
         if reading.is_cancelled() {
@@ -50,14 +50,16 @@ pub async fn reading_data_from_sensors(
 }
 
 pub fn spawn_detection_threads(
-    sensors: Vec<Arc<Mutex<MotionSensor>>>,
-    stop_command: CancellationToken,
+    sensors: Arc<Vec<Mutex<MotionSensor>>>,
+    stop_command: Arc<CancellationToken>,
 ) {
     let sensors_copy = sensors.clone();
-    let token_copy = stop_command.clone();
-    tokio::spawn(async move { process_detections_data(sensors, stop_command.clone()).await });
 
+    let stop_command_copy = stop_command.clone();
+    tokio::spawn(async move { process_detections_data(sensors_copy, stop_command_copy).await });
+
+    let stop_command_copy = stop_command.clone();
     tokio::spawn(async move {
-        reading_data_from_sensors(sensors_copy, token_copy).await;
+        reading_data_from_sensors(sensors.clone(), stop_command_copy).await;
     });
 }

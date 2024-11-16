@@ -72,9 +72,7 @@ impl MotionSensor {
 
         let (detections_stream, detections_receiver) = mpsc::channel(10);
 
-        // if pin_init.is_some() {
         detection_stream_channel_init = Some(detections_stream);
-        // }
 
         //
         // initialization
@@ -122,10 +120,8 @@ impl MotionSensor {
                 // that's why try_send() is used here
                 // unwrap_or_default() - because we don't care if each single detection is successfully
                 //                       sent
-                if detection_stream_channel.is_some() {
+                if let Some(detection_stream_channel) = detection_stream_channel.as_ref() {
                     detection_stream_channel
-                        .clone()
-                        .expect("cannot use channel for detection stream")
                         .try_send(true)
                         .unwrap_or_default()
                 }

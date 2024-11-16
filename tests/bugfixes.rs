@@ -83,9 +83,11 @@ mod tests {
             //
             let mut sensors = Vec::new();
             let name = test_case.sensor.config.name.clone();
-            sensors.push(Arc::new(Mutex::new(test_case.sensor)));
+            sensors.push(Mutex::new(test_case.sensor));
 
-            let token = CancellationToken::new();
+            let sensors = Arc::new(sensors);
+
+            let token = Arc::new(CancellationToken::new());
 
             spawn_detection_threads(sensors, token.clone());
 
